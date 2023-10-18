@@ -1,0 +1,117 @@
+<?php
+
+function filter( $msg )
+{
+		$msg = htmlspecialchars( $msg );
+		$search = array( '|', '\'', '$', '\\', '^', '%', '`', "\0", "\x00", "\x1A", chr( 226 ) . chr( 128 ) . chr( 174 ) );
+		$replace = array( '&#124;', '&#39;', '&#36;', '&#92;', '&#94;', '&#37;', '&#96;', '', '', '', '' );
+
+		$msg = str_replace( $search, $replace, $msg );
+		$msg = preg_replace( "/eval|config|template|\.htaccess|include|open|copy|delete/i", '', $msg );
+		$msg = stripslashes( trim( $msg ) );
+
+		return $msg;
+}
+
+header( "Expires: Thu, 01 Jan 2010 00:00:01 GMT" );
+header( "Last-Modified: " . gmdate( "D, d M Y H:i:s" ) . " GMT" );
+header( "Cache-Control: no-cache, no-store, must-revalidate, max-age=0" );
+header( "Pragma: no-cache" );
+header( "Content-type:text/vnd.wap.wml;charset=windows-1251" );
+echo '<?xml version="1.0" encoding="windows-1251"?>';
+echo "<!DOCTYPE wml PUBLIC '-//WAPFORUM//DTD WML 1.3//EN' 'http://www.wapforum.org/DTD/wml13.dtd'>";
+
+$starttime = microtime( 1 );
+
+//=========================
+$server = 'localhost';
+$user = 'admin_root'; // пользователь базы
+$dbpass = '19121976';     // пароль пользователя
+$dbname = 'admin_ad'; // имя базы
+//=========================
+
+$SERVER_URL = 'http://ad.hostik.in/'; //путь к игре
+$PHP_SELF = 'g.php'; //   мотор игры
+$GAME_NAME = 'Образец';
+$g_max = 100; //   максимум игроков
+$g_admin = 'u.rastoman'; //  логин админа
+$gm_id = 'hrenvam'; // вход админом
+$gg_list = 5;
+$g_list = 5;
+$g_size = 2200;
+$g_menu = 0;
+$g_smenu = '301021';
+$g_j2loc = 1;
+$g_j2go = 1;
+$g_joff = 0;
+$g_smf = 0;
+$g_map = 3;
+$g_sounds = 0;
+$g_logout = 300;
+$g_destroy = 600;
+$g_crim = 1800;
+$g_exp = 10;
+$g_attr = 12;
+$g_attr_one = 5;
+$g_skills = 50;
+$g_skills_one = 5;
+$g_ch = 0;
+$loc_i = array();
+$loc_t = array();
+$loc_tt = array();
+//==================================ПЕРЕХОД В REGISTER_GLOBALS OFF!!!!!!
+$cnt_get = count( $_GET );
+if ( $cnt_get )
+{
+		foreach ( $_GET as $key => $vals )
+		{
+				if ( empty( $vals ) )
+				{
+						unset( $key, $vals );
+						continue;
+				}
+				if ( !is_string( $vals ) && !is_numeric( $vals ) || !preg_match( "|^[-a-z0-9_\.\|\:]+$|i", $vals ) )
+				{
+						die ('Вы ввели запрещенные символы');
+				}
+				if ( is_numeric( $vals ) )
+				{
+						$vals = abs( intval( $vals ) );
+						eval( '$' . $key . '=' . $vals . ';' );
+				}
+				else
+						eval( '$' . $key . '="' . $vals . '";' );
+		}
+		unset( $_GET, $cnt_get, $key, $vals );
+}
+//------------------------------
+$cnt_post = count( $_POST );
+if ( $cnt_post )
+{
+		foreach ( $_POST as $key => $vals )
+		{
+				if ( empty( $vals ) )
+				{
+						unset( $key, $vals );
+						continue;
+				}
+				if ( is_numeric( $vals ) )
+				{
+						$vals = abs( intval( $vals ) );
+						eval( '$' . $key . '=' . $vals . ';' );
+				} elseif ( is_array( $vals ) )
+				{
+						die ('Лучше писать буквами');
+				}
+				else
+				{
+						$vals = filter( $vals );
+						eval( '$' . $key . '="' . $vals . '";' );
+				}
+		}
+		unset( $_POST, $cnt_post, $key, $vals );
+}
+//===============================================================
+
+
+?>

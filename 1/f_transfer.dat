@@ -1,0 +1,59 @@
+<?php
+
+if ( $char[8] )
+		msg( 'Вы призрак и поэтому не можете ничего передать, поднять или бросить, найдите лекаря или камень воскрешения' );
+if ( !isset( $transfer ) || empty( $transfer ) )
+		msg( 'Некому передать' );
+if ( substr( $transfer, 0, 2 ) != 'u.' )
+		msg( 'Передавать предметы можно только игрокам' );
+if ( !isset( $loc_i[$loc][$transfer] ) )
+		msg( 'Рядом с вами нет того, кому вы хотели передать предмет' );
+if ( $transfer == $login )
+		msg( 'Нельзя передать вещи самому себе' );
+$tchar = explode( '|', $loc_i[$loc][$transfer]['char'] );
+if ( $tchar[8] )
+		msg( $tchar[0] . ' призрак, ему нельзя ничего передать' );
+if ( !isset( $id ) || empty( $id ) )
+		msg( 'У вас нет этого предмета' );
+$tcount = additem( $loc, $login, '', $id, 'count' );
+if ( $tcount == 0 )
+		msg( 'У вас нет этого предмета' );
+if ( $tcount > 1 && !$num )
+{
+		$stmp = '<p>Укажите количество:<br />
+               <input name="num" format="*N" maxlength="7" value="' . $tcount . '"/><br />
+               <a href="' . $PHP_SELF . '?sid=' . $sid . '&transfer=' . $transfer . '&id=' . $id . '&num=$(num)">Передать</a>';
+		msg( $stmp, 'Передать', 1, '', 'num', $tcount );
+}
+$num = intval( $num );
+if ( !$num || $num < 1 )
+		$num = 1;
+if ( $num > $tcount )
+		msg( 'У вас нет такого количества вещей' );
+
+if ( strpos( $id, '_' ) !== false )
+		$idname = substr( $id, 0, strpos( $id, '_' ) );
+elseif ( strpos( $id, '-' ) !== false )
+		$idname = substr( $id, 0, strpos( $id, '-' ) );
+else
+		$idname = $id;
+
+if ( file_exists( 'items/' . $idname ) )
+{
+		$name = explode( '|', file_get_contents( 'items/' . $idname ) );
+		$name = $name[0];
+}
+if ( strstr( $idname, '..' ) )
+		$name .= ' *';
+
+additem( $loc, $login, $transfer, $id, $num, 'items', 'items', 1, -1, 1 );
+$ud = explode( '|', $loc_i[$loc][$login]['user'] );
+if ( $ud[2] == 'm' )
+		$dr = 'передал';
+elseif ( $ud[2] == 'f' )
+		$dr = 'передала';
+addjournal( $loc, 'all', $char[0] . ' ' . $dr . ' ' . $tchar[0] . ' ' . $num . ' ' . $name );
+unset( $ud );
+unset( $dr );
+
+?>
